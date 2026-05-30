@@ -1,0 +1,55 @@
+{
+  "checked_at": "2026-05-30T07:52:21.997717+00:00",
+  "sites": [
+    {
+      "name": "Lexplair",
+      "url": "https://lexplair.com",
+      "checked_at": "2026-05-30T07:52:21.997717+00:00",
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "ok": true,
+          "error": null
+        },
+        {
+          "path": "/articles",
+          "status": 200,
+          "ok": true,
+          "error": null
+        },
+        {
+          "path": "/tools",
+          "status": 200,
+          "ok": true,
+          "error": null
+        },
+        {
+          "path": "/store",
+          "status": 200,
+          "ok": true,
+          "error": null
+        }
+      ],
+      "ssl_days": 89,
+      "github_status": "success",
+      "overall": "ok"
+    },
+    {
+      "name": "Trendlair",
+      "url": "https://trendlair.com",
+      "checked_at": "2026-05-30T07:52:21.997717+00:00",
+      "pages": [
+        {
+          "path": "/",
+          "status": 200,
+          "ok": true,
+          "error": null
+        }
+      ],
+      "ssl_days": 86,
+      "github_status": "success",
+      "overall": "ok"
+    }
+  ]
+}
