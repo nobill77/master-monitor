@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Monitor Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #09090f; color: #e5e5e5; font-family: 'Segoe UI', sans-serif; min-height: 100vh; padding: 2rem; }
+  h1 { color: #c9a84c; font-size: 1.8rem; margin-bottom: 0.3rem; }
+  .subtitle { color: #888; font-size: 0.9rem; margin-bottom: 2rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; }
+  .card { background: #13131f; border: 1px solid #1e1e2e; border-radius: 12px; padding: 1.5rem; }
+  .card.ok   { border-left: 4px solid #22c55e; }
+  .card.down { border-left: 4px solid #ef4444; }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .site-name { font-size: 1.1rem; font-weight: 600; color: #f0f0f0; }
+  .badge { padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+  .badge.ok   { background: #14532d; color: #22c55e; }
+  .badge.down { background: #450a0a; color: #ef4444; }
+  .pages { margin-top: 0.8rem; }
+  .page-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #1e1e2e; font-size: 0.85rem; }
+  .page-row:last-child { border-bottom: none; }
+  .page-path { color: #aaa; }
+  .status-ok   { color: #22c55e; }
+  .status-fail { color: #ef4444; }
+  .meta { margin-top: 1rem; display: flex; gap: 1rem; flex-wrap: wrap; }
+  .meta-item { font-size: 0.8rem; color: #666; }
+  .meta-item span { color: #aaa; }
+  .checked-at { color: #555; font-size: 0.8rem; margin-bottom: 1.5rem; }
+  .loading { color: #555; font-size: 1rem; margin-top: 3rem; text-align: center; }
+  .summary { display: flex; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .summary-card { background: #13131f; border: 1px solid #1e1e2e; border-radius: 8px; padding: 1rem 1.5rem; text-align: center; }
+  .summary-num { font-size: 2rem; font-weight: 700; color: #c9a84c; }
+  .summary-label { font-size: 0.75rem; color: #666; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<h1>🛡️ Master Monitor</h1>
+<p class="subtitle">Auto-refreshes every 5 minutes</p>
+
+<div class="summary" id="summary"></div>
+<div class="checked-at" id="checked-at">Loading...</div>
+<div class="grid" id="grid"><p class="loading">⏳ Loading results...</p></div>
+
+<script>
+async function load() {
+  try {
+    const r = await fetch('results.json?t=' + Date.now());
+    const data = await r.json();
+
+    const sites = data.sites || [];
+    const okCount = sites.filter(s => s.overall === 'ok').length;
+    const downCount = sites.length - okCount;
+
+    document.getElementById('checked-at').textContent =
+      'Last checked: ' + (data.checked_at || '').replace('T', ' ').slice(0, 16) + ' UTC';
+
+    document.getElementById('summary').innerHTML = `
+      <div class="summary-card"><div class="summary-num">${sites.length}</div><div class="summary-label">TOTAL SITES</div></div>
+      <div class="summary-card"><div class="summary-num" style="color:#22c55e">${okCount}</div><div class="summary-label">ONLINE</div></div>
+      <div class="summary-card"><div class="summary-num" style="color:#ef4444">${downCount}</div><div class="summary-label">ISSUES</div></div>
+    `;
+
+    document.getElementById('grid').innerHTML = sites.map(site => `
+      <div class="card ${site.overall}">
+        <div class="card-header">
+          <div class="site-name">${site.name}</div>
+          <span class="badge ${site.overall}">${site.overall === 'ok' ? '✓ Online' : '✗ Issues'}</span>
+        </div>
+        <div class="pages">
+          ${(site.pages || []).map(p => `
+            <div class="page-row">
+              <span class="page-path">${p.path}</span>
+              <span class="${p.ok ? 'status-ok' : 'status-fail'}">${p.ok ? '✓ ' + p.status : '✗ ' + (p.status || p.error || 'fail')}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="meta">
+          ${site.ssl_days != null ? `<div class="meta-item">SSL: <span>${site.ssl_days}d</span></div>` : ''}
+          ${site.github_status ? `<div class="meta-item">CI: <span>${site.github_status}</span></div>` : ''}
+        </div>
+      </div>
+    `).join('');
+
+  } catch(e) {
+    document.getElementById('grid').innerHTML = '<p class="loading">⚠️ Could not load results.json</p>';
+  }
+}
+
+load();
+setInterval(load, 5 * 60 * 1000);
+</script>
+</body>
+</html>
