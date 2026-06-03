@@ -130,7 +130,7 @@ let curTab='github';
 
 function loadConfig(){
   CFG.gh=localStorage.getItem('m_gh')||'';
-  CFG.sb_url=localStorage.getItem('m_sb_url')||'';
+  CFG.sb_url=localStorage.getItem('m_sb_url')||'https://hefcrjxqsokcmwqytaws.supabase.co';
   CFG.sb_key=localStorage.getItem('m_sb_key')||'';
   if(CFG.gh) document.getElementById('inp-gh').value=CFG.gh;
   if(CFG.sb_url) document.getElementById('inp-sb-url').value=CFG.sb_url;
