@@ -1,96 +1,317 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Master Monitor Dashboard</title>
+<title>مراقبة المواقع</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #09090f; color: #e5e5e5; font-family: 'Segoe UI', sans-serif; min-height: 100vh; padding: 2rem; }
-  h1 { color: #c9a84c; font-size: 1.8rem; margin-bottom: 0.3rem; }
-  .subtitle { color: #888; font-size: 0.9rem; margin-bottom: 2rem; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.5rem; }
-  .card { background: #13131f; border: 1px solid #1e1e2e; border-radius: 12px; padding: 1.5rem; }
-  .card.ok   { border-left: 4px solid #22c55e; }
-  .card.down { border-left: 4px solid #ef4444; }
-  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-  .site-name { font-size: 1.1rem; font-weight: 600; color: #f0f0f0; }
-  .badge { padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
-  .badge.ok   { background: #14532d; color: #22c55e; }
-  .badge.down { background: #450a0a; color: #ef4444; }
-  .pages { margin-top: 0.8rem; }
-  .page-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #1e1e2e; font-size: 0.85rem; }
-  .page-row:last-child { border-bottom: none; }
-  .page-path { color: #aaa; }
-  .status-ok   { color: #22c55e; }
-  .status-fail { color: #ef4444; }
-  .meta { margin-top: 1rem; display: flex; gap: 1rem; flex-wrap: wrap; }
-  .meta-item { font-size: 0.8rem; color: #666; }
-  .meta-item span { color: #aaa; }
-  .checked-at { color: #555; font-size: 0.8rem; margin-bottom: 1.5rem; }
-  .loading { color: #555; font-size: 1rem; margin-top: 3rem; text-align: center; }
-  .summary { display: flex; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
-  .summary-card { background: #13131f; border: 1px solid #1e1e2e; border-radius: 8px; padding: 1rem 1.5rem; text-align: center; }
-  .summary-num { font-size: 2rem; font-weight: 700; color: #c9a84c; }
-  .summary-label { font-size: 0.75rem; color: #666; margin-top: 2px; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,sans-serif;background:#f4f4f5;color:#111;padding:20px;max-width:980px;margin:0 auto}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+h1{font-size:20px;font-weight:700}
+.sub{font-size:12px;color:#888;margin-top:2px}
+.btn{padding:8px 16px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px;font-family:inherit}
+.btn:hover{background:#f0f0f0}
+.setup{background:#fff;border-radius:12px;border:1px solid #e4e4e7;padding:20px;margin-bottom:20px;display:none}
+.setup h2{font-size:14px;font-weight:700;margin-bottom:12px}
+.setup input{width:100%;border:1px solid #ddd;border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:8px;font-family:inherit;direction:ltr}
+.setup .savebtn{padding:8px 20px;border-radius:8px;background:#2563eb;color:#fff;border:none;font-size:13px;cursor:pointer;font-family:inherit}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.statcard{background:#fff;border-radius:12px;padding:16px 20px;border:1px solid #e4e4e7}
+.label{font-size:11px;color:#888;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.big{font-size:32px;font-weight:700;line-height:1}
+.meta{font-size:12px;margin-top:6px}
+.ok{color:#16a34a}.warn{color:#d97706}.err{color:#dc2626}
+.box{background:#fff;border-radius:12px;border:1px solid #e4e4e7;margin-bottom:16px;overflow:hidden}
+.boxhead{padding:13px 18px;border-bottom:1px solid #f0f0f0;font-size:14px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.boxhead .right{font-size:11px;color:#aaa;font-weight:400}
+.tabs{display:flex;background:#fafafa;border-bottom:1px solid #f0f0f0}
+.tab{flex:1;padding:10px;font-size:13px;font-weight:500;border:none;background:transparent;cursor:pointer;color:#888;font-family:inherit;border-bottom:2px solid transparent}
+.tab.on{color:#2563eb;border-bottom:2px solid #2563eb;background:#fff}
+.item{display:flex;gap:12px;padding:13px 18px;border-bottom:1px solid #f5f5f5;align-items:flex-start}
+.item:last-child{border-bottom:none}
+.ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.info{flex:1;min-width:0}
+.ititle{font-size:13px;font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ititle a{color:#111;text-decoration:none}
+.ititle a:hover{color:#2563eb;text-decoration:underline}
+.idesc{font-size:12px;color:#666;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.imeta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.tag{font-size:11px;padding:2px 7px;border-radius:20px;font-weight:500}
+.tgh{background:#eff6ff;color:#1d4ed8}.tph{background:#f5f3ff;color:#6d28d9}.trd{background:#fff7ed;color:#c2410c}
+.tart{background:#f0fdf4;color:#15803d}.ttol{background:#fff7ed;color:#b45309}
+.ndot{width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;margin-left:5px}
+.stars{font-size:12px;color:#f59e0b;font-weight:500}
+.alert{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#dc2626;display:none}
+.alert.show{display:flex;gap:8px;align-items:flex-start}
+.fixbtn{margin-top:6px;padding:5px 12px;border-radius:6px;background:#dc2626;color:#fff;border:none;font-size:12px;cursor:pointer;font-family:inherit}
+.fixbtn:hover{background:#b91c1c}
+.empty{text-align:center;padding:28px;color:#aaa;font-size:13px}
+.runs{padding:12px 18px}
+.run{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:12px}
+.run:last-child{border-bottom:none}
+.rname{flex:1;color:#555}.rtime{color:#aaa}
 </style>
 </head>
 <body>
 
-<h1>🛡️ Master Monitor</h1>
-<p class="subtitle">Auto-refreshes every 5 minutes</p>
+<div class="topbar">
+  <div>
+    <h1>📊 مراقبة المواقع</h1>
+    <p class="sub" id="sub">—</p>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn" onclick="document.getElementById('setup').style.display='block'">⚙️ إعدادات</button>
+    <button class="btn" onclick="loadAll()">🔄 تحديث</button>
+  </div>
+</div>
 
-<div class="summary" id="summary"></div>
-<div class="checked-at" id="checked-at">Loading...</div>
-<div class="grid" id="grid"><p class="loading">⏳ Loading results...</p></div>
+<div class="setup" id="setup">
+  <h2>🔑 أدخل البيانات مرة واحدة وهتتحفظ</h2>
+  <input type="password" id="inp-gh" placeholder="GitHub Token (ghp_...)" />
+  <input type="password" id="inp-sb-url" placeholder="Supabase URL (https://...supabase.co)" />
+  <input type="password" id="inp-sb-key" placeholder="Supabase Anon Key" />
+  <button class="savebtn" onclick="saveConfig()">💾 حفظ</button>
+</div>
+
+<div class="alert" id="alert-lx">
+  <div>
+    <div>⚠️ <strong>Lexplair Brain وقف!</strong> <span id="alert-lx-msg"></span></div>
+    <button class="fixbtn" onclick="triggerBrain()">▶ تشغيل Brain دلوقتي</button>
+  </div>
+</div>
+
+<div class="alert" id="alert-te">
+  <div>⚠️ <strong>Trendlair:</strong> <span id="alert-te-msg"></span></div>
+</div>
+
+<div class="grid2">
+  <div class="statcard">
+    <div class="label">🚀 Trendlair — النهارده</div>
+    <div class="big" id="te-big">—</div>
+    <div class="meta" id="te-meta">—</div>
+  </div>
+  <div class="statcard">
+    <div class="label">📚 Lexplair — آخر محتوى</div>
+    <div class="big" id="lx-big">—</div>
+    <div class="meta" id="lx-meta">—</div>
+  </div>
+</div>
+
+<div class="box">
+  <div class="boxhead">
+    <span>🚀 Trendlair — اللي اترفع على الموقع</span>
+    <span class="right" id="te-run-time">—</span>
+  </div>
+  <div class="tabs">
+    <button class="tab on" onclick="swTab('github')" id="ttab-github">⭐ GitHub</button>
+    <button class="tab" onclick="swTab('ph')" id="ttab-ph">🚀 Product Hunt</button>
+    <button class="tab" onclick="swTab('hn')" id="ttab-hn">🔥 HackerNews</button>
+  </div>
+  <div id="te-content"><div class="empty">جاري التحميل...</div></div>
+  <div class="boxhead" style="border-top:1px solid #f0f0f0;border-bottom:none;font-size:12px;color:#888;font-weight:400">آخر 5 runs</div>
+  <div class="runs" id="te-runs"></div>
+</div>
+
+<div class="box">
+  <div class="boxhead">
+    <span>📚 Lexplair — المقالات والأدوات</span>
+    <span class="right" id="lx-run-time">—</span>
+  </div>
+  <div id="lx-content"><div class="empty">جاري التحميل...</div></div>
+  <div class="boxhead" style="border-top:1px solid #f0f0f0;border-bottom:none;font-size:12px;color:#888;font-weight:400">آخر 5 runs</div>
+  <div class="runs" id="lx-runs"></div>
+</div>
 
 <script>
-async function load() {
-  try {
-    const r = await fetch('results.json?t=' + Date.now());
-    const data = await r.json();
+let CFG={gh:'',sb_url:'',sb_key:''};
+let sbItems=[];
+let curTab='github';
 
-    const sites = data.sites || [];
-    const okCount = sites.filter(s => s.overall === 'ok').length;
-    const downCount = sites.length - okCount;
-
-    document.getElementById('checked-at').textContent =
-      'Last checked: ' + (data.checked_at || '').replace('T', ' ').slice(0, 16) + ' UTC';
-
-    document.getElementById('summary').innerHTML = `
-      <div class="summary-card"><div class="summary-num">${sites.length}</div><div class="summary-label">TOTAL SITES</div></div>
-      <div class="summary-card"><div class="summary-num" style="color:#22c55e">${okCount}</div><div class="summary-label">ONLINE</div></div>
-      <div class="summary-card"><div class="summary-num" style="color:#ef4444">${downCount}</div><div class="summary-label">ISSUES</div></div>
-    `;
-
-    document.getElementById('grid').innerHTML = sites.map(site => `
-      <div class="card ${site.overall}">
-        <div class="card-header">
-          <div class="site-name">${site.name}</div>
-          <span class="badge ${site.overall}">${site.overall === 'ok' ? '✓ Online' : '✗ Issues'}</span>
-        </div>
-        <div class="pages">
-          ${(site.pages || []).map(p => `
-            <div class="page-row">
-              <span class="page-path">${p.path}</span>
-              <span class="${p.ok ? 'status-ok' : 'status-fail'}">${p.ok ? '✓ ' + p.status : '✗ ' + (p.status || p.error || 'fail')}</span>
-            </div>
-          `).join('')}
-        </div>
-        <div class="meta">
-          ${site.ssl_days != null ? `<div class="meta-item">SSL: <span>${site.ssl_days}d</span></div>` : ''}
-          ${site.github_status ? `<div class="meta-item">CI: <span>${site.github_status}</span></div>` : ''}
-        </div>
-      </div>
-    `).join('');
-
-  } catch(e) {
-    document.getElementById('grid').innerHTML = '<p class="loading">⚠️ Could not load results.json</p>';
-  }
+function loadConfig(){
+  CFG.gh=localStorage.getItem('m_gh')||'';
+  CFG.sb_url=localStorage.getItem('m_sb_url')||'';
+  CFG.sb_key=localStorage.getItem('m_sb_key')||'';
+  if(CFG.gh) document.getElementById('inp-gh').value=CFG.gh;
+  if(CFG.sb_url) document.getElementById('inp-sb-url').value=CFG.sb_url;
+  if(CFG.sb_key) document.getElementById('inp-sb-key').value=CFG.sb_key;
 }
 
-load();
-setInterval(load, 5 * 60 * 1000);
+function saveConfig(){
+  CFG.gh=document.getElementById('inp-gh').value.trim();
+  CFG.sb_url=document.getElementById('inp-sb-url').value.trim();
+  CFG.sb_key=document.getElementById('inp-sb-key').value.trim();
+  localStorage.setItem('m_gh',CFG.gh);
+  localStorage.setItem('m_sb_url',CFG.sb_url);
+  localStorage.setItem('m_sb_key',CFG.sb_key);
+  document.getElementById('setup').style.display='none';
+  loadAll();
+}
+
+function ago(d){
+  const s=(Date.now()-new Date(d))/1000;
+  if(s<3600) return Math.floor(s/60)+' دقيقة';
+  if(s<86400) return Math.floor(s/3600)+' ساعة';
+  return Math.floor(s/86400)+' يوم';
+}
+function isNew(d){return(Date.now()-new Date(d))<172800000;}
+function isToday(d){const n=new Date(),t=new Date(d);return t.toDateString()===n.toDateString();}
+
+async function gfetch(path){
+  const r=await fetch('https://api.github.com'+path,{headers:{'Authorization':'token '+CFG.gh}});
+  return r.json();
+}
+
+async function loadAll(){
+  if(!CFG.gh){document.getElementById('setup').style.display='block';return;}
+  document.getElementById('sub').textContent='جاري التحميل...';
+  await Promise.all([loadTrendlair(),loadLexplair()]);
+  document.getElementById('sub').textContent='آخر تحديث: '+new Date().toLocaleTimeString('ar-EG');
+}
+
+async function loadTrendlair(){
+  try{
+    if(CFG.sb_url&&CFG.sb_key){
+      const r=await fetch(CFG.sb_url+'/rest/v1/items?select=*&order=created_at.desc&limit=100',{
+        headers:{'apikey':CFG.sb_key,'Authorization':'Bearer '+CFG.sb_key}
+      });
+      if(r.ok) sbItems=await r.json();
+    }
+  }catch(e){sbItems=[];}
+
+  const runs=await gfetch('/repos/nobill77/discovery-engine/actions/runs?per_page=5');
+  const rlist=runs.workflow_runs||[];
+  const last=rlist[0];
+  if(last) document.getElementById('te-run-time').textContent='آخر run: منذ '+ago(last.updated_at);
+
+  const todayCount=sbItems.filter(i=>isToday(i.created_at)).length;
+  const total=sbItems.length;
+  document.getElementById('te-big').textContent=todayCount||total||'—';
+  document.getElementById('te-meta').innerHTML=total===0
+    ?'<span class="err">❌ لا توجد بيانات في Supabase</span>'
+    :todayCount>0?'<span class="ok">✅ اترفع النهارده</span>'
+    :'<span class="warn">⚠️ آخر رفع: منذ '+ago(sbItems[0]?.created_at)+'</span>';
+
+  if(total===0){
+    const a=document.getElementById('alert-te');
+    a.classList.add('show');
+    document.getElementById('alert-te-msg').textContent='البيانات مش بتتحفظ في Supabase. الـ workflow شغال بس في مشكلة في الاتصال.';
+  }
+
+  document.getElementById('te-runs').innerHTML=rlist.map(r=>`
+    <div class="run">
+      <span>${r.conclusion==='success'?'✅':'❌'}</span>
+      <span class="rname">#${r.run_number} ${r.name}</span>
+      <span class="rtime">منذ ${ago(r.updated_at)}</span>
+    </div>`).join('');
+
+  renderTab();
+}
+
+async function loadLexplair(){
+  const [commits,runs]=await Promise.all([
+    gfetch('/repos/nobill77/Lexplair/commits?per_page=50'),
+    gfetch('/repos/nobill77/Lexplair/actions/runs?per_page=5')
+  ]);
+
+  const rlist=runs.workflow_runs||[];
+  const last=rlist[0];
+  if(last) document.getElementById('lx-run-time').textContent='آخر run: منذ '+ago(last.updated_at);
+
+  document.getElementById('lx-runs').innerHTML=rlist.map(r=>`
+    <div class="run">
+      <span>${r.conclusion==='success'?'✅':'❌'}</span>
+      <span class="rname">#${r.run_number} ${r.name}</span>
+      <span class="rtime">منذ ${ago(r.updated_at)}</span>
+    </div>`).join('');
+
+  const content=commits.filter(c=>{
+    const m=c.commit.message;
+    return m.includes('[ARTICLE]')||m.includes('[TOOL]');
+  });
+
+  const daysSince=content[0]?Math.floor((Date.now()-new Date(content[0].commit.author.date))/86400000):999;
+  document.getElementById('lx-big').textContent=content.length;
+  document.getElementById('lx-meta').innerHTML=daysSince===0
+    ?'<span class="ok">✅ نزل محتوى النهارده</span>'
+    :`<span class="${daysSince>3?'err':'warn'}">⚠️ آخر محتوى منذ ${daysSince} أيام</span>`;
+
+  if(daysSince>3){
+    document.getElementById('alert-lx').classList.add('show');
+    document.getElementById('alert-lx-msg').textContent=`آخر مقال/أداة منذ ${daysSince} أيام — الـ Brain بيشتغل بس مش بينتج محتوى.`;
+  }
+
+  document.getElementById('lx-content').innerHTML=content.length?content.slice(0,15).map(c=>{
+    const msg=c.commit.message.split('\n')[0];
+    const isArt=msg.includes('[ARTICLE]');
+    const clean=msg.replace('🤖','').replace('[ARTICLE]','').replace('[TOOL]','').replace(/\(score:[^)]+\)/g,'').trim();
+    const d=new Date(c.commit.author.date);
+    return `<div class="item">
+      <div class="ico" style="background:${isArt?'#f0fdf4':'#fff7ed'}">${isArt?'📄':'🛠️'}</div>
+      <div class="info">
+        <div class="ititle">${isNew(c.commit.author.date)?'<span class="ndot"></span>':''}${clean}</div>
+        <div class="imeta">
+          <span class="tag ${isArt?'tart':'ttol'}">${isArt?'مقال':'أداة'}</span>
+          <span style="font-size:11px;color:#aaa;">منذ ${ago(c.commit.author.date)} · ${d.toLocaleDateString('ar-EG')}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join(''):'<div class="empty">لا يوجد محتوى</div>';
+}
+
+function swTab(tab){
+  curTab=tab;
+  ['github','ph','hn'].forEach(t=>{
+    document.getElementById('ttab-'+t).className='tab'+(t===tab?' on':'');
+  });
+  renderTab();
+}
+
+function renderTab(){
+  let items=sbItems.filter(i=>{
+    if(curTab==='github') return i.source==='github'||i.type==='repo';
+    if(curTab==='ph') return i.source==='product_hunt'||i.type==='tool';
+    if(curTab==='hn') return i.source==='hackernews'||i.type==='article';
+    return false;
+  });
+  const el=document.getElementById('te-content');
+  if(!items.length){
+    el.innerHTML='<div class="empty">لا توجد بيانات — افتح <a href="https://trendlair.com" target="_blank" style="color:#2563eb">trendlair.com</a> مباشرة</div>';
+    return;
+  }
+  const icons={github:'⭐',ph:'🚀',hn:'🔥'};
+  const bgs={github:'#eff6ff',ph:'#f5f3ff',hn:'#fff7ed'};
+  const tags={github:'tgh',ph:'tph',hn:'trd'};
+  el.innerHTML=items.slice(0,20).map(i=>`
+    <div class="item">
+      <div class="ico" style="background:${bgs[curTab]}">${icons[curTab]}</div>
+      <div class="info">
+        <div class="ititle">${isNew(i.created_at)?'<span class="ndot"></span>':''}<a href="${i.url||i.github_url||'#'}" target="_blank">${i.title||'—'}</a></div>
+        ${i.description?`<div class="idesc">${i.description}</div>`:''}
+        <div class="imeta">
+          ${i.stars?`<span class="stars">⭐ ${Number(i.stars).toLocaleString()}</span>`:''}
+          ${i.tags?.[0]?`<span class="tag ${tags[curTab]}">${i.tags[0]}</span>`:''}
+          <span style="font-size:11px;color:#aaa;">منذ ${ago(i.created_at)}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+async function triggerBrain(){
+  const btn=document.querySelector('.fixbtn');
+  btn.textContent='جاري...';btn.disabled=true;
+  const r=await fetch('https://api.github.com/repos/nobill77/Lexplair/actions/workflows/273732300/dispatches',{
+    method:'POST',
+    headers:{'Authorization':'token '+CFG.gh,'Content-Type':'application/json'},
+    body:JSON.stringify({ref:'main'})
+  });
+  btn.textContent=r.status===204?'✅ تم! انتظر دقيقتين':'❌ فشل';
+  if(r.status!==204) btn.disabled=false;
+}
+
+loadConfig();
+if(CFG.gh) loadAll();
+else document.getElementById('setup').style.display='block';
 </script>
 </body>
 </html>
