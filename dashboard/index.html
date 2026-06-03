@@ -225,13 +225,25 @@ async function loadLexplair(){
       <span class="rtime">منذ ${ago(r.updated_at)}</span>
     </div>`).join('');
 
-  const content=commits.filter(c=>{
+  // Also fetch articles and tools from repo files
+const [articlesData, toolsData] = await Promise.all([
+  gfetch('/repos/nobill77/Lexplair/contents/lexplair-v2/content/articles').catch(()=>[]),
+  gfetch('/repos/nobill77/Lexplair/contents/tools').catch(()=>[])
+]);
+const articleFiles = Array.isArray(articlesData) ? articlesData.filter(f=>f.name.endsWith('.md')) : [];
+const toolFiles = Array.isArray(toolsData) ? toolsData.filter(f=>f.type==='dir') : [];
+
+const content=commits.filter(c=>{
     const m=c.commit.message;
     return m.includes('[ARTICLE]')||m.includes('[TOOL]');
   });
 
-  const daysSince=content[0]?Math.floor((Date.now()-new Date(content[0].commit.author.date))/86400000):999;
-  document.getElementById('lx-big').textContent=content.length;
+  // Use latest file if newer than commits
+const latestFileDate = articleFiles[0]?.last_modified || null;
+const latestCommitDate = content[0]?.commit.author.date || null;
+const latestDate = latestFileDate && (!latestCommitDate || latestFileDate > latestCommitDate) ? latestFileDate : latestCommitDate;
+const daysSince=latestDate?Math.floor((Date.now()-new Date(latestDate))/86400000):999;
+  document.getElementById('lx-big').textContent=Math.max(content.length, articleFiles.length + toolFiles.length);
   document.getElementById('lx-meta').innerHTML=daysSince===0
     ?'<span class="ok">✅ نزل محتوى النهارده</span>'
     :`<span class="${daysSince>3?'err':'warn'}">⚠️ آخر محتوى منذ ${daysSince} أيام</span>`;
@@ -241,7 +253,33 @@ async function loadLexplair(){
     document.getElementById('alert-lx-msg').textContent=`آخر مقال/أداة منذ ${daysSince} أيام — الـ Brain بيشتغل بس مش بينتج محتوى.`;
   }
 
-  document.getElementById('lx-content').innerHTML=content.length?content.slice(0,15).map(c=>{
+  // Merge commits and files
+const allContent = [...content];
+// Add file-based articles not in commits
+articleFiles.slice(0,10).forEach(f=>{
+  const name = f.name.replace('.md','').replace(/-/g,' ').replace(/\w/g,l=>l.toUpperCase());
+  if(!allContent.find(c=>c.commit.message.includes(f.name.replace('.md','')))){
+    allContent.push({_file:true, _name:name, _type:'مقال', _date:f.last_modified||new Date().toISOString()});
+  }
+});
+toolFiles.slice(0,5).forEach(f=>{
+  const name = f.name.replace(/-/g,' ').replace(/\w/g,l=>l.toUpperCase());
+  if(!allContent.find(c=>c.commit.message.includes(f.name))){
+    allContent.push({_file:true, _name:name, _type:'أداة', _date:f.last_modified||new Date().toISOString()});
+  }
+});
+
+document.getElementById('lx-content').innerHTML=allContent.length?allContent.slice(0,15).map(c=>{
+if(c._file){
+  return \`<div class="item">
+    <div class="ico" style="background:\${c._type==='مقال'?'#f0fdf4':'#fff7ed'}">\${c._type==='مقال'?'📄':'🛠️'}</div>
+    <div class="info">
+      <div class="ititle">\${c._name}</div>
+      <div class="imeta"><span class="tag \${c._type==='مقال'?'tart':'ttol'}">\${c._type}</span><span style="font-size:11px;color:#aaa;">منذ \${ago(c._date)}</span></div>
+    </div>
+  </div>\`;
+}
+return (c=>{
     const msg=c.commit.message.split('\n')[0];
     const isArt=msg.includes('[ARTICLE]');
     const clean=msg.replace('🤖','').replace('[ARTICLE]','').replace('[TOOL]','').replace(/\(score:[^)]+\)/g,'').trim();
@@ -256,7 +294,8 @@ async function loadLexplair(){
         </div>
       </div>
     </div>`;
-  }).join(''):'<div class="empty">لا يوجد محتوى</div>';
+  })(c);
+}).join(''):'<div class="empty">لا يوجد محتوى</div>';
 }
 
 function swTab(tab){
