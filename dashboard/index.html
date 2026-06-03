@@ -227,11 +227,12 @@ async function loadLexplair(){
 
   const content=commits.filter(c=>{
     const m=c.commit.message;
-    return m.includes('[ARTICLE]')||m.includes('[TOOL]');
+    return m.includes('[ARTICLE]')||m.includes('[TOOL]')||m.includes('Brain: new content')||m.includes('brain');
   });
 
   
-  var daysSince=content[0]?Math.floor((Date.now()-new Date(content[0].commit.author.date))/86400000):999;
+  var allBrainCommits=commits.filter(function(c){var m=c.commit.message;return m.includes('Brain')||m.includes('[ARTICLE]')||m.includes('[TOOL]');});
+  var daysSince=allBrainCommits[0]?Math.floor((Date.now()-new Date(allBrainCommits[0].commit.author.date))/86400000):999;
   document.getElementById('lx-big').textContent=content.length;
   document.getElementById('lx-meta').innerHTML=daysSince===0
     ?'<span class="ok">✅ نزل محتوى النهارده</span>'
