@@ -225,24 +225,12 @@ async function loadLexplair(){
       <span class="rtime">منذ ${ago(r.updated_at)}</span>
     </div>`).join('');
 
-  // Also fetch articles and tools from repo files
-const [articlesData, toolsData] = await Promise.all([
-  gfetch('/repos/nobill77/Lexplair/contents/lexplair-v2/content/articles').catch(()=>[]),
-  gfetch('/repos/nobill77/Lexplair/contents/tools').catch(()=>[])
-]);
-const articleFiles = Array.isArray(articlesData) ? articlesData.filter(f=>f.name.endsWith('.md')) : [];
-const toolFiles = Array.isArray(toolsData) ? toolsData.filter(f=>f.type==='dir') : [];
-
-const content=commits.filter(c=>{
+  const content=commits.filter(c=>{
     const m=c.commit.message;
     return m.includes('[ARTICLE]')||m.includes('[TOOL]');
   });
 
-  // Use latest file if newer than commits
-const latestFileDate = articleFiles[0]?.last_modified || null;
-const latestCommitDate = content[0]?.commit.author.date || null;
-const latestDate = latestFileDate && (!latestCommitDate || latestFileDate > latestCommitDate) ? latestFileDate : latestCommitDate;
-const daysSince=latestDate?Math.floor((Date.now()-new Date(latestDate))/86400000):999;
+  
   document.getElementById('lx-big').textContent=Math.max(content.length, articleFiles.length + toolFiles.length);
   document.getElementById('lx-meta').innerHTML=daysSince===0
     ?'<span class="ok">✅ نزل محتوى النهارده</span>'
@@ -294,8 +282,7 @@ return (c=>{
         </div>
       </div>
     </div>`;
-  })(c);
-}).join(''):'<div class="empty">لا يوجد محتوى</div>';
+  }).join(''):'<div class="empty">لا يوجد محتوى</div>';
 }
 
 function swTab(tab){
