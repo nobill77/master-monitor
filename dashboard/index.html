@@ -195,10 +195,12 @@ function swTab(btn,tab){curTab=tab;document.querySelectorAll('.tab').forEach(fun
 function renderTab(){
   var f=items.filter(function(i){
     if(curTab==='github')return i.source==='github'||i.type==='repo';
-    if(curTab==='ph')return i.source==='product_hunt'||i.type==='tool';
-    if(curTab==='hn')return i.source==='hackernews'||i.type==='article';
+    if(curTab==='ph')return i.source==='product_hunt'||i.type==='tool'||(i.source==='producthunt');
+    if(curTab==='hn')return i.source==='hackernews'||i.type==='article'||i.source==='reddit';
     return false;
   });
+  // If no items for this tab, show all items
+  if(!f.length && items.length) f=items.slice(0,20);
   var el=document.getElementById('te-c');
   if(!f.length){el.innerHTML='<div class="empty">لا بيانات — افتح <a href="https://trendlair.com" target="_blank" style="color:#2563eb">trendlair.com</a></div>';return;}
   var icons={github:'⭐',ph:'🚀',hn:'🔥'};
