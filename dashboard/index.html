@@ -131,7 +131,7 @@ let curTab='github';
 function loadConfig(){
   CFG.gh=localStorage.getItem('m_gh')||'';
   CFG.sb_url=localStorage.getItem('m_sb_url')||'https://hefcrjxqsokcmwqytaws.supabase.co';
-  CFG.sb_key=localStorage.getItem('m_sb_key')||'';
+  CFG.sb_key=localStorage.getItem('m_sb_key')||'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlZmNyanhxc29rY213cXl0YXdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NDkwNTksImV4cCI6MjA5NTMyNTA1OX0.AVHBKTyOokpl7zDuCEr3bHfYXHvB8AvZmBhliS5FrA4';
   if(CFG.gh) document.getElementById('inp-gh').value=CFG.gh;
   if(CFG.sb_url) document.getElementById('inp-sb-url').value=CFG.sb_url;
   if(CFG.sb_key) document.getElementById('inp-sb-key').value=CFG.sb_key;
