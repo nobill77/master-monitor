@@ -231,6 +231,7 @@ async function loadLexplair(){
   });
 
   
+  var daysSince=content[0]?Math.floor((Date.now()-new Date(content[0].commit.author.date))/86400000):999;
   document.getElementById('lx-big').textContent=content.length;
   document.getElementById('lx-meta').innerHTML=daysSince===0
     ?'<span class="ok">✅ نزل محتوى النهارده</span>'
