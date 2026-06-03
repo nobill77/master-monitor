@@ -6,327 +6,226 @@
 <title>مراقبة المواقع</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:system-ui,sans-serif;background:#f4f4f5;color:#111;padding:20px;max-width:980px;margin:0 auto}
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-h1{font-size:20px;font-weight:700}
-.sub{font-size:12px;color:#888;margin-top:2px}
-.btn{padding:8px 16px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px;font-family:inherit}
-.btn:hover{background:#f0f0f0}
-.setup{background:#fff;border-radius:12px;border:1px solid #e4e4e7;padding:20px;margin-bottom:20px;display:none}
-.setup h2{font-size:14px;font-weight:700;margin-bottom:12px}
-.setup input{width:100%;border:1px solid #ddd;border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:8px;font-family:inherit;direction:ltr}
-.setup .savebtn{padding:8px 20px;border-radius:8px;background:#2563eb;color:#fff;border:none;font-size:13px;cursor:pointer;font-family:inherit}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
-.statcard{background:#fff;border-radius:12px;padding:16px 20px;border:1px solid #e4e4e7}
-.label{font-size:11px;color:#888;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
-.big{font-size:32px;font-weight:700;line-height:1}
-.meta{font-size:12px;margin-top:6px}
+body{font-family:system-ui,sans-serif;background:#f4f4f5;color:#111;padding:20px;max-width:960px;margin:0 auto}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+h1{font-size:20px;font-weight:700}.sub{font-size:12px;color:#888;margin-top:2px}
+.btn{padding:8px 16px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px;font-family:inherit}.btn:hover{background:#f0f0f0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.card{background:#fff;border-radius:12px;padding:16px 20px;border:1px solid #e4e4e7}
+.card .lbl{font-size:11px;color:#888;margin-bottom:6px;text-transform:uppercase}
+.card .big{font-size:32px;font-weight:700}.card .meta{font-size:12px;margin-top:6px}
 .ok{color:#16a34a}.warn{color:#d97706}.err{color:#dc2626}
 .box{background:#fff;border-radius:12px;border:1px solid #e4e4e7;margin-bottom:16px;overflow:hidden}
-.boxhead{padding:13px 18px;border-bottom:1px solid #f0f0f0;font-size:14px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
-.boxhead .right{font-size:11px;color:#aaa;font-weight:400}
+.bhead{padding:13px 18px;border-bottom:1px solid #f0f0f0;font-size:14px;font-weight:700;display:flex;justify-content:space-between}
+.bhead span{font-size:11px;color:#aaa;font-weight:400;align-self:center}
 .tabs{display:flex;background:#fafafa;border-bottom:1px solid #f0f0f0}
 .tab{flex:1;padding:10px;font-size:13px;font-weight:500;border:none;background:transparent;cursor:pointer;color:#888;font-family:inherit;border-bottom:2px solid transparent}
 .tab.on{color:#2563eb;border-bottom:2px solid #2563eb;background:#fff}
-.item{display:flex;gap:12px;padding:13px 18px;border-bottom:1px solid #f5f5f5;align-items:flex-start}
+.item{display:flex;gap:12px;padding:12px 18px;border-bottom:1px solid #f5f5f5;align-items:flex-start}
 .item:last-child{border-bottom:none}
-.ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .info{flex:1;min-width:0}
-.ititle{font-size:13px;font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ititle a{color:#111;text-decoration:none}
-.ititle a:hover{color:#2563eb;text-decoration:underline}
-.idesc{font-size:12px;color:#666;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.imeta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.ttl{font-size:13px;font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ttl a{color:#111;text-decoration:none}.ttl a:hover{color:#2563eb;text-decoration:underline}
+.desc{font-size:12px;color:#666;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta2{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .tag{font-size:11px;padding:2px 7px;border-radius:20px;font-weight:500}
 .tgh{background:#eff6ff;color:#1d4ed8}.tph{background:#f5f3ff;color:#6d28d9}.trd{background:#fff7ed;color:#c2410c}
 .tart{background:#f0fdf4;color:#15803d}.ttol{background:#fff7ed;color:#b45309}
-.ndot{width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;margin-left:5px}
 .stars{font-size:12px;color:#f59e0b;font-weight:500}
+.sec-lbl{font-size:12px;padding:8px 18px;border-bottom:1px solid #f0f0f0;font-weight:600}
+.sec-lbl.new{color:#16a34a;background:#f0fdf4}.sec-lbl.old{color:#888;background:#fafafa}
 .alert{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#dc2626;display:none}
 .alert.show{display:flex;gap:8px;align-items:flex-start}
-.fixbtn{margin-top:6px;padding:5px 12px;border-radius:6px;background:#dc2626;color:#fff;border:none;font-size:12px;cursor:pointer;font-family:inherit}
-.fixbtn:hover{background:#b91c1c}
+.fbtn{margin-top:6px;padding:5px 12px;border-radius:6px;background:#dc2626;color:#fff;border:none;font-size:12px;cursor:pointer;font-family:inherit}
 .empty{text-align:center;padding:28px;color:#aaa;font-size:13px}
-.runs{padding:12px 18px}
-.run{display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #f5f5f5;font-size:12px}
-.run:last-child{border-bottom:none}
-.rname{flex:1;color:#555}.rtime{color:#aaa}
+.runs{padding:10px 18px}
+.run{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:12px}
+.run:last-child{border-bottom:none}.rn{flex:1;color:#555}.rt{color:#aaa}
+.new-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;margin-left:4px;vertical-align:middle}
+#sp{background:#fff;border:1px solid #e4e4e7;border-radius:12px;padding:16px;margin-bottom:16px;display:none}
 </style>
 </head>
 <body>
-
-<div class="topbar">
-  <div>
-    <h1>📊 مراقبة المواقع</h1>
-    <p class="sub" id="sub">—</p>
-  </div>
+<div class="top">
+  <div><h1>📊 مراقبة المواقع</h1><p class="sub" id="sub">—</p></div>
   <div style="display:flex;gap:8px">
-    <button class="btn" onclick="document.getElementById('setup').style.display='block'">⚙️ إعدادات</button>
-    <button class="btn" onclick="loadAll()">🔄 تحديث</button>
+    <button class="btn" onclick="showSettings()">⚙️ إعدادات</button>
+    <button class="btn" onclick="init()">🔄 تحديث</button>
   </div>
 </div>
 
-<div class="setup" id="setup">
-  <h2>🔑 أدخل البيانات مرة واحدة وهتتحفظ</h2>
-  <input type="password" id="inp-gh" placeholder="GitHub Token (ghp_...)" />
-  <input type="password" id="inp-sb-url" placeholder="Supabase URL (https://...supabase.co)" />
-  <input type="password" id="inp-sb-key" placeholder="Supabase Anon Key" />
-  <button class="savebtn" onclick="saveConfig()">💾 حفظ</button>
+<div id="sp">
+  <p style="font-size:14px;font-weight:600;margin-bottom:10px">🔑 GitHub Token</p>
+  <input id="gh-inp" type="password" placeholder="ghp_..." style="width:100%;border:1px solid #ddd;border-radius:8px;padding:8px;font-size:13px;margin-bottom:8px;direction:ltr">
+  <button onclick="saveSettings()" style="padding:7px 16px;border-radius:8px;background:#2563eb;color:#fff;border:none;cursor:pointer;font-size:13px">حفظ</button>
 </div>
 
-<div class="alert" id="alert-lx">
-  <div>
-    <div>⚠️ <strong>Lexplair Brain وقف!</strong> <span id="alert-lx-msg"></span></div>
-    <button class="fixbtn" onclick="triggerBrain()">▶ تشغيل Brain دلوقتي</button>
-  </div>
+<div class="alert" id="alx">
+  <div>⚠️ <strong>Lexplair Brain وقف!</strong> <span id="alx-msg"></span>
+  <br><button class="fbtn" onclick="triggerBrain()">▶ تشغيل Brain دلوقتي</button></div>
 </div>
 
-<div class="alert" id="alert-te">
-  <div>⚠️ <strong>Trendlair:</strong> <span id="alert-te-msg"></span></div>
-</div>
-
-<div class="grid2">
-  <div class="statcard">
-    <div class="label">🚀 Trendlair — النهارده</div>
-    <div class="big" id="te-big">—</div>
-    <div class="meta" id="te-meta">—</div>
-  </div>
-  <div class="statcard">
-    <div class="label">📚 Lexplair — آخر محتوى</div>
-    <div class="big" id="lx-big">—</div>
-    <div class="meta" id="lx-meta">—</div>
-  </div>
+<div class="grid">
+  <div class="card"><div class="lbl">🚀 Trendlair — النهارده</div><div class="big" id="te-n">—</div><div class="meta" id="te-m">—</div></div>
+  <div class="card"><div class="lbl">📚 Lexplair — محتوى جديد</div><div class="big" id="lx-n">—</div><div class="meta" id="lx-m">—</div></div>
 </div>
 
 <div class="box">
-  <div class="boxhead">
-    <span>🚀 Trendlair — اللي اترفع على الموقع</span>
-    <span class="right" id="te-run-time">—</span>
-  </div>
+  <div class="bhead">🚀 Trendlair — اللي اترفع <span id="te-rt">—</span></div>
   <div class="tabs">
-    <button class="tab on" onclick="swTab('github')" id="ttab-github">⭐ GitHub</button>
-    <button class="tab" onclick="swTab('ph')" id="ttab-ph">🚀 Product Hunt</button>
-    <button class="tab" onclick="swTab('hn')" id="ttab-hn">🔥 HackerNews</button>
+    <button class="tab on" onclick="swTab(this,'github')">⭐ GitHub</button>
+    <button class="tab" onclick="swTab(this,'ph')">🚀 Product Hunt</button>
+    <button class="tab" onclick="swTab(this,'hn')">🔥 HackerNews</button>
   </div>
-  <div id="te-content"><div class="empty">جاري التحميل...</div></div>
-  <div class="boxhead" style="border-top:1px solid #f0f0f0;border-bottom:none;font-size:12px;color:#888;font-weight:400">آخر 5 runs</div>
-  <div class="runs" id="te-runs"></div>
+  <div id="te-c"><div class="empty">جاري...</div></div>
+  <div style="padding:8px 18px;border-top:1px solid #f0f0f0;font-size:11px;color:#aaa">آخر 5 runs</div>
+  <div class="runs" id="te-r"></div>
 </div>
 
 <div class="box">
-  <div class="boxhead">
-    <span>📚 Lexplair — المقالات والأدوات</span>
-    <span class="right" id="lx-run-time">—</span>
-  </div>
-  <div id="lx-content"><div class="empty">جاري التحميل...</div></div>
-  <div class="boxhead" style="border-top:1px solid #f0f0f0;border-bottom:none;font-size:12px;color:#888;font-weight:400">آخر 5 runs</div>
-  <div class="runs" id="lx-runs"></div>
+  <div class="bhead">📚 Lexplair — المقالات والأدوات <span id="lx-rt">—</span></div>
+  <div id="lx-c"><div class="empty">جاري...</div></div>
+  <div style="padding:8px 18px;border-top:1px solid #f0f0f0;font-size:11px;color:#aaa">آخر 5 runs</div>
+  <div class="runs" id="lx-r"></div>
 </div>
 
 <script>
-let CFG={gh:'',sb_url:'',sb_key:''};
-let sbItems=[];
-let curTab='github';
+var GH=localStorage.getItem('gh')||'';
+var SB='https://hefcrjxqsokcmwqytaws.supabase.co';
+var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlZmNyanhxc29rY213cXl0YXdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NDkwNTksImV4cCI6MjA5NTMyNTA1OX0.AVHBKTyOokpl7zDuCEr3bHfYXHvB8AvZmBhliS5FrA4';
+var items=[];var curTab='github';
 
-function loadConfig(){
-  CFG.gh=localStorage.getItem('m_gh')||'';
-  CFG.sb_url=localStorage.getItem('m_sb_url')||'https://hefcrjxqsokcmwqytaws.supabase.co';
-  CFG.sb_key=localStorage.getItem('m_sb_key')||'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhlZmNyanhxc29rY213cXl0YXdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NDkwNTksImV4cCI6MjA5NTMyNTA1OX0.AVHBKTyOokpl7zDuCEr3bHfYXHvB8AvZmBhliS5FrA4';
-  if(CFG.gh) document.getElementById('inp-gh').value=CFG.gh;
-  if(CFG.sb_url) document.getElementById('inp-sb-url').value=CFG.sb_url;
-  if(CFG.sb_key) document.getElementById('inp-sb-key').value=CFG.sb_key;
-}
-
-function saveConfig(){
-  CFG.gh=document.getElementById('inp-gh').value.trim();
-  CFG.sb_url=document.getElementById('inp-sb-url').value.trim();
-  CFG.sb_key=document.getElementById('inp-sb-key').value.trim();
-  localStorage.setItem('m_gh',CFG.gh);
-  localStorage.setItem('m_sb_url',CFG.sb_url);
-  localStorage.setItem('m_sb_key',CFG.sb_key);
-  document.getElementById('setup').style.display='none';
-  loadAll();
-}
-
-function ago(d){
-  const s=(Date.now()-new Date(d))/1000;
-  if(s<3600) return Math.floor(s/60)+' دقيقة';
-  if(s<86400) return Math.floor(s/3600)+' ساعة';
-  return Math.floor(s/86400)+' يوم';
-}
+function ago(d){var s=(Date.now()-new Date(d))/1000;if(s<3600)return Math.floor(s/60)+' دقيقة';if(s<86400)return Math.floor(s/3600)+' ساعة';return Math.floor(s/86400)+' يوم';}
+function isToday(d){var n=new Date(),t=new Date(d);return t.toDateString()===n.toDateString();}
 function isNew(d){return(Date.now()-new Date(d))<172800000;}
-function isToday(d){const n=new Date(),t=new Date(d);return t.toDateString()===n.toDateString();}
+function gh(p){return fetch('https://api.github.com'+p,{headers:{'Authorization':'token '+GH}}).then(function(r){return r.json();});}
 
-async function gfetch(path){
-  const r=await fetch('https://api.github.com'+path,{headers:{'Authorization':'token '+CFG.gh}});
-  return r.json();
-}
-
-async function loadAll(){
-  if(!CFG.gh){document.getElementById('setup').style.display='block';return;}
-  document.getElementById('sub').textContent='جاري التحميل...';
-  await Promise.all([loadTrendlair(),loadLexplair()]);
-  document.getElementById('sub').textContent='آخر تحديث: '+new Date().toLocaleTimeString('ar-EG');
-}
-
-async function loadTrendlair(){
-  try{
-    if(CFG.sb_url&&CFG.sb_key){
-      const r=await fetch(CFG.sb_url+'/rest/v1/items?select=*&order=created_at.desc&limit=100',{
-        headers:{'apikey':CFG.sb_key,'Authorization':'Bearer '+CFG.sb_key}
-      });
-      if(r.ok) sbItems=await r.json();
-    }
-  }catch(e){sbItems=[];}
-
-  const runs=await gfetch('/repos/nobill77/discovery-engine/actions/runs?per_page=5');
-  const rlist=runs.workflow_runs||[];
-  const last=rlist[0];
-  if(last) document.getElementById('te-run-time').textContent='آخر run: منذ '+ago(last.updated_at);
-
-  const todayCount=sbItems.filter(i=>isToday(i.created_at)).length;
-  const total=sbItems.length;
-  document.getElementById('te-big').textContent=todayCount||total||'—';
-  document.getElementById('te-meta').innerHTML=total===0
-    ?'<span class="err">❌ لا توجد بيانات في Supabase</span>'
-    :todayCount>0?'<span class="ok">✅ اترفع النهارده</span>'
-    :'<span class="warn">⚠️ آخر رفع: منذ '+ago(sbItems[0]?.created_at)+'</span>';
-
-  if(total===0){
-    const a=document.getElementById('alert-te');
-    a.classList.add('show');
-    document.getElementById('alert-te-msg').textContent='البيانات مش بتتحفظ في Supabase. الـ workflow شغال بس في مشكلة في الاتصال.';
-  }
-
-  document.getElementById('te-runs').innerHTML=rlist.map(r=>`
-    <div class="run">
-      <span>${r.conclusion==='success'?'✅':'❌'}</span>
-      <span class="rname">#${r.run_number} ${r.name}</span>
-      <span class="rtime">منذ ${ago(r.updated_at)}</span>
-    </div>`).join('');
-
-  renderTab();
-}
-
-async function loadLexplair(){
-  const [commits,runs]=await Promise.all([
-    gfetch('/repos/nobill77/Lexplair/commits?per_page=50'),
-    gfetch('/repos/nobill77/Lexplair/actions/runs?per_page=5')
-  ]);
-
-  const rlist=runs.workflow_runs||[];
-  const last=rlist[0];
-  if(last) document.getElementById('lx-run-time').textContent='آخر run: منذ '+ago(last.updated_at);
-
-  document.getElementById('lx-runs').innerHTML=rlist.map(r=>`
-    <div class="run">
-      <span>${r.conclusion==='success'?'✅':'❌'}</span>
-      <span class="rname">#${r.run_number} ${r.name}</span>
-      <span class="rtime">منذ ${ago(r.updated_at)}</span>
-    </div>`).join('');
-
-  const content=commits.filter(c=>{
-    const m=c.commit.message;
-    return m.includes('[ARTICLE]')||m.includes('[TOOL]')||m.includes('Brain: new content')||m.includes('brain');
+function init(){
+  var saved=localStorage.getItem('gh');
+  if(!saved){document.getElementById('sub').innerHTML='<span style="color:red">محتاج GitHub Token — اضغط ⚙️ إعدادات</span>';return;}
+  GH=saved;
+  document.getElementById('sub').textContent='جاري...';
+  Promise.all([loadTe(),loadLx()]).then(function(){
+    document.getElementById('sub').textContent='آخر تحديث: '+new Date().toLocaleTimeString('ar-EG');
   });
+}
 
-  
-  var allBrainCommits=commits.filter(function(c){var m=c.commit.message;return m.includes('Brain')||m.includes('[ARTICLE]')||m.includes('[TOOL]');});
-  var daysSince=allBrainCommits[0]?Math.floor((Date.now()-new Date(allBrainCommits[0].commit.author.date))/86400000):999;
-  // Split into new (last 48h) and all
-  var newContent=content.filter(function(c){return (Date.now()-new Date(c.commit.author.date))<172800000;});
-  var oldContent=content.filter(function(c){return (Date.now()-new Date(c.commit.author.date))>=172800000;});
-  document.getElementById('lx-big').textContent=content.length;
-  document.getElementById('lx-meta').innerHTML=daysSince===0
-    ?'<span class="ok">✅ نزل محتوى النهارده</span>'
-    :`<span class="${daysSince>3?'err':'warn'}">⚠️ آخر محتوى منذ ${daysSince} أيام</span>`;
+function loadTe(){
+  return fetch(SB+'/rest/v1/items?select=*&order=created_at.desc&limit=200',{
+    headers:{'apikey':SK,'Authorization':'Bearer '+SK}
+  }).then(function(r){return r.ok?r.json():[];}).then(function(d){
+    items=Array.isArray(d)?d:[];
+    var today=items.filter(function(i){return isToday(i.created_at);});
+    document.getElementById('te-n').textContent=today.length||items.length||'—';
+    document.getElementById('te-m').innerHTML=items.length===0?'<span class="err">❌ لا بيانات</span>':today.length>0?'<span class="ok">✅ اترفع النهارده</span>':'<span class="warn">⚠️ منذ '+ago(items[0].created_at)+'</span>';
+    renderTab();
+  }).catch(function(){
+    document.getElementById('te-n').textContent='—';
+    document.getElementById('te-m').innerHTML='<span class="err">❌ خطأ اتصال</span>';
+  }).then(function(){
+    return gh('/repos/nobill77/discovery-engine/actions/runs?per_page=5');
+  }).then(function(d){
+    var rl=d.workflow_runs||[];
+    if(rl[0])document.getElementById('te-rt').textContent='آخر run: منذ '+ago(rl[0].updated_at);
+    document.getElementById('te-r').innerHTML=rl.map(function(r){
+      return '<div class="run"><span>'+(r.conclusion==='success'?'✅':'❌')+'</span><span class="rn">#'+r.run_number+' '+r.name+'</span><span class="rt">منذ '+ago(r.updated_at)+'</span></div>';
+    }).join('');
+  }).catch(function(){});
+}
 
-  if(daysSince>3){
-    document.getElementById('alert-lx').classList.add('show');
-    document.getElementById('alert-lx-msg').textContent=`آخر مقال/أداة منذ ${daysSince} أيام — الـ Brain بيشتغل بس مش بينتج محتوى.`;
+function loadLx(){
+  return gh('/repos/nobill77/Lexplair/commits?per_page=50').then(function(commits){
+    var brain=commits.filter(function(c){
+      var m=c.commit.message;
+      return m.includes('[ARTICLE]')||m.includes('[TOOL]')||m.includes('Brain:');
+    });
+    var daysSince=brain[0]?Math.floor((Date.now()-new Date(brain[0].commit.author.date))/86400000):999;
+    var newI=brain.filter(function(c){return isNew(c.commit.author.date);});
+    document.getElementById('lx-n').textContent=newI.length>0?newI.length:brain.length;
+    document.getElementById('lx-m').innerHTML=daysSince===0?'<span class="ok">✅ نزل النهارده</span>':'<span class="'+(daysSince>3?'err':'warn')+'">⚠️ منذ '+daysSince+' أيام</span>';
+    if(daysSince>3){document.getElementById('alx').classList.add('show');document.getElementById('alx-msg').textContent='آخر محتوى منذ '+daysSince+' أيام.';}
+    else{document.getElementById('alx').classList.remove('show');}
+
+    return Promise.all(brain.slice(0,15).map(function(c){
+      return gh('/repos/nobill77/Lexplair/commits/'+c.sha).catch(function(){return {};});
+    })).then(function(dets){
+      dets.forEach(function(d,i){if(d.files)brain[i]._files=d.files;});
+      var nI=brain.filter(function(c){return isNew(c.commit.author.date);});
+      var oI=brain.filter(function(c){return !isNew(c.commit.author.date);});
+      var html='';
+      if(nI.length){html+='<div class="sec-lbl new">✅ جديد — آخر 48 ساعة ('+nI.length+' عنصر)</div>';html+=nI.map(renderLx).join('');}
+      if(oI.length){html+='<div class="sec-lbl old">السابق</div>';html+=oI.slice(0,8).map(renderLx).join('');}
+      document.getElementById('lx-c').innerHTML=html||'<div class="empty">لا يوجد محتوى</div>';
+    });
+  }).then(function(){
+    return gh('/repos/nobill77/Lexplair/actions/runs?per_page=5');
+  }).then(function(d){
+    var rl=d.workflow_runs||[];
+    if(rl[0])document.getElementById('lx-rt').textContent='آخر run: منذ '+ago(rl[0].updated_at);
+    document.getElementById('lx-r').innerHTML=rl.map(function(r){
+      return '<div class="run"><span>'+(r.conclusion==='success'?'✅':'❌')+'</span><span class="rn">#'+r.run_number+' '+r.name+'</span><span class="rt">منذ '+ago(r.updated_at)+'</span></div>';
+    }).join('');
+  }).catch(function(){});
+}
+
+function renderLx(c){
+  var msg=c.commit.message.split('\n')[0];
+  var isArt=msg.includes('[ARTICLE]');
+  var isTool=msg.includes('[TOOL]');
+  var name=msg.replace('🤖','').replace('[ARTICLE]','').replace('[TOOL]','').replace(/\(score:[^)]+\)/g,'').trim();
+  if(c._files&&c._files.length>0){
+    var f=c._files[0];
+    var fn=f.filename.split('/').pop().replace('.md','').replace('.html','').replace(/-/g,' ');
+    name=fn.charAt(0).toUpperCase()+fn.slice(1);
+    isArt=f.filename.includes('articles');
+    isTool=f.filename.includes('tools');
   }
-
-  document.getElementById('lx-big').textContent = newContent.length > 0 ? newContent.length : content.length;
-  document.getElementById('lx-content').innerHTML=(newContent.length||content.length)?[
-    newContent.length ? '<div style="font-size:12px;font-weight:600;color:#16a34a;padding:10px 18px 4px;border-bottom:1px solid #f0f0f0">✅ جديد — آخر 48 ساعة ('+newContent.length+' عنصر)</div>' : '',
-    ...newContent.map(function(c){return renderLxItem(c);}),
-    oldContent.length ? '<div style="font-size:12px;color:#888;padding:10px 18px 4px;border-bottom:1px solid #f0f0f0;border-top:'+(newContent.length?'2px solid #e5e7eb':'none')+'">السابق ('+oldContent.length+' عنصر)</div>' : '',
-    ...oldContent.slice(0,8).map(function(c){return renderLxItem(c);})
-  ].join(''):'<div class="empty">لا يوجد محتوى</div>';
+  var d=new Date(c.commit.author.date);
+  var dot=isNew(c.commit.author.date)?'<span class="new-dot"></span>':'';
+  var bg=isArt?'#f0fdf4':isTool?'#fff7ed':'#f5f5f5';
+  var icon=isArt?'📄':isTool?'🛠️':'🔄';
+  var tagCls=isArt?'tart':isTool?'ttol':'tgh';
+  var tagName=isArt?'مقال':isTool?'أداة':'تحديث';
+  return '<div class="item"><div class="ico" style="background:'+bg+'">'+icon+'</div><div class="info"><div class="ttl">'+dot+name+'</div><div class="meta2"><span class="tag '+tagCls+'">'+tagName+'</span><span style="font-size:11px;color:#aaa">منذ '+ago(c.commit.author.date)+' · '+d.toLocaleDateString('ar-EG')+'</span></div></div></div>';
 }
 
-function renderLxItem(c){
-  return (function(c){
-    // Try to get real name from commit files if generic Brain commit
-    var msg=c.commit.message.split('\n')[0];
-    var isArt=msg.includes('[ARTICLE]')||msg.includes('articles/');
-    // If generic Brain commit, try to get name from files
-    var clean=msg.replace('🤖','').replace('[ARTICLE]','').replace('[TOOL]','').replace(/\(score:[^)]+\)/g,'').trim();
-    if(c._files && c._files.length>0){
-      var f=c._files[0];
-      var fname=f.filename.split('/').pop().replace('.md','').replace('.html','').replace(/-/g,' ');
-      clean=fname.charAt(0).toUpperCase()+fname.slice(1);
-      isArt=f.filename.includes('articles');
-    }
-    var d=new Date(c.commit.author.date);
-    return '<div class="item"><div class="ico" style="background:'+(isArt?'#f0fdf4':'#fff7ed')+'">'+(isArt?'📄':'🛠️')+'</div><div class="info"><div class="ititle">'+clean+'</div><div class="imeta"><span class="tag '+(isArt?'tart':'ttol')+'">'+(isArt?'مقال':'أداة')+'</span><span style="font-size:11px;color:#aaa;">منذ '+ago(c.commit.author.date)+' · '+d.toLocaleDateString('ar-EG')+'</span></div></div></div>';
-  })(c);
-}
-}
-
-function swTab(tab){
-  curTab=tab;
-  ['github','ph','hn'].forEach(t=>{
-    document.getElementById('ttab-'+t).className='tab'+(t===tab?' on':'');
-  });
-  renderTab();
-}
+function swTab(btn,tab){curTab=tab;document.querySelectorAll('.tab').forEach(function(b){b.className='tab';});btn.className='tab on';renderTab();}
 
 function renderTab(){
-  let items=sbItems.filter(i=>{
-    if(curTab==='github') return i.source==='github'||i.type==='repo';
-    if(curTab==='ph') return i.source==='product_hunt'||i.type==='tool';
-    if(curTab==='hn') return i.source==='hackernews'||i.type==='article';
+  var f=items.filter(function(i){
+    if(curTab==='github')return i.source==='github'||i.type==='repo';
+    if(curTab==='ph')return i.source==='product_hunt'||i.type==='tool';
+    if(curTab==='hn')return i.source==='hackernews'||i.type==='article';
     return false;
   });
-  const el=document.getElementById('te-content');
-  if(!items.length){
-    el.innerHTML='<div class="empty">لا توجد بيانات — افتح <a href="https://trendlair.com" target="_blank" style="color:#2563eb">trendlair.com</a> مباشرة</div>';
-    return;
-  }
-  const icons={github:'⭐',ph:'🚀',hn:'🔥'};
-  const bgs={github:'#eff6ff',ph:'#f5f3ff',hn:'#fff7ed'};
-  const tags={github:'tgh',ph:'tph',hn:'trd'};
-  el.innerHTML=items.slice(0,20).map(i=>`
-    <div class="item">
-      <div class="ico" style="background:${bgs[curTab]}">${icons[curTab]}</div>
-      <div class="info">
-        <div class="ititle">${isNew(i.created_at)?'<span class="ndot"></span>':''}<a href="${i.url||i.github_url||'#'}" target="_blank">${i.title||'—'}</a></div>
-        ${i.description?`<div class="idesc">${i.description}</div>`:''}
-        <div class="imeta">
-          ${i.stars?`<span class="stars">⭐ ${Number(i.stars).toLocaleString()}</span>`:''}
-          ${i.tags?.[0]?`<span class="tag ${tags[curTab]}">${i.tags[0]}</span>`:''}
-          <span style="font-size:11px;color:#aaa;">منذ ${ago(i.created_at)}</span>
-        </div>
-      </div>
-    </div>`).join('');
+  var el=document.getElementById('te-c');
+  if(!f.length){el.innerHTML='<div class="empty">لا بيانات — افتح <a href="https://trendlair.com" target="_blank" style="color:#2563eb">trendlair.com</a></div>';return;}
+  var icons={github:'⭐',ph:'🚀',hn:'🔥'};
+  var bgs={github:'#eff6ff',ph:'#f5f3ff',hn:'#fff7ed'};
+  var tags={github:'tgh',ph:'tph',hn:'trd'};
+  el.innerHTML=f.slice(0,20).map(function(i){
+    var dot=isNew(i.created_at)?'<span class="new-dot"></span>':'';
+    return '<div class="item"><div class="ico" style="background:'+bgs[curTab]+'">'+icons[curTab]+'</div><div class="info"><div class="ttl">'+dot+'<a href="'+(i.url||'#')+'" target="_blank">'+(i.title||'—')+'</a></div>'+(i.description?'<div class="desc">'+i.description+'</div>':'')+'<div class="meta2">'+(i.stars?'<span class="stars">⭐ '+Number(i.stars).toLocaleString()+'</span>':'')+'<span class="tag '+tags[curTab]+'">'+curTab+'</span><span style="font-size:11px;color:#aaa">منذ '+ago(i.created_at)+'</span></div></div></div>';
+  }).join('');
 }
 
-async function triggerBrain(){
-  const btn=document.querySelector('.fixbtn');
-  btn.textContent='جاري...';btn.disabled=true;
-  const r=await fetch('https://api.github.com/repos/nobill77/Lexplair/actions/workflows/273732300/dispatches',{
-    method:'POST',
-    headers:{'Authorization':'token '+CFG.gh,'Content-Type':'application/json'},
+function triggerBrain(){
+  var b=document.querySelector('.fbtn');b.textContent='جاري...';b.disabled=true;
+  fetch('https://api.github.com/repos/nobill77/Lexplair/actions/workflows/273732300/dispatches',{
+    method:'POST',headers:{'Authorization':'token '+GH,'Content-Type':'application/json'},
     body:JSON.stringify({ref:'main'})
-  });
-  btn.textContent=r.status===204?'✅ تم! انتظر دقيقتين':'❌ فشل';
-  if(r.status!==204) btn.disabled=false;
+  }).then(function(r){b.textContent=r.status===204?'✅ تم!':'❌ فشل';if(r.status!==204)b.disabled=false;});
 }
 
-loadConfig();
-if(CFG.gh) loadAll();
-else document.getElementById('setup').style.display='block';
+function showSettings(){document.getElementById('sp').style.display='block';}
+function saveSettings(){
+  var t=document.getElementById('gh-inp').value.trim();
+  if(t){localStorage.setItem('gh',t);GH=t;document.getElementById('sp').style.display='none';init();}
+}
+
+init();
+
 </script>
 </body>
 </html>
