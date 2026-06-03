@@ -257,9 +257,17 @@ async function loadLexplair(){
 
 function renderLxItem(c){
   return (function(c){
+    // Try to get real name from commit files if generic Brain commit
     var msg=c.commit.message.split('\n')[0];
-    var isArt=msg.includes('[ARTICLE]');
+    var isArt=msg.includes('[ARTICLE]')||msg.includes('articles/');
+    // If generic Brain commit, try to get name from files
     var clean=msg.replace('🤖','').replace('[ARTICLE]','').replace('[TOOL]','').replace(/\(score:[^)]+\)/g,'').trim();
+    if(c._files && c._files.length>0){
+      var f=c._files[0];
+      var fname=f.filename.split('/').pop().replace('.md','').replace('.html','').replace(/-/g,' ');
+      clean=fname.charAt(0).toUpperCase()+fname.slice(1);
+      isArt=f.filename.includes('articles');
+    }
     var d=new Date(c.commit.author.date);
     return '<div class="item"><div class="ico" style="background:'+(isArt?'#f0fdf4':'#fff7ed')+'">'+(isArt?'📄':'🛠️')+'</div><div class="info"><div class="ititle">'+clean+'</div><div class="imeta"><span class="tag '+(isArt?'tart':'ttol')+'">'+(isArt?'مقال':'أداة')+'</span><span style="font-size:11px;color:#aaa;">منذ '+ago(c.commit.author.date)+' · '+d.toLocaleDateString('ar-EG')+'</span></div></div></div>';
   })(c);
