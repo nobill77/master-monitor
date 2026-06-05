@@ -138,7 +138,7 @@ function loadLx(){
   return gh('/repos/nobill77/Lexplair/commits?per_page=50').then(function(commits){
     var brain=commits.filter(function(c){
       var m=c.commit.message;
-      return m.includes('[ARTICLE]')||m.includes('[TOOL]')||m.includes('Brain:');
+      return m.includes('[ARTICLE]')||m.includes('[TOOL]')||m.includes('Brain:')||m.includes('Brain new content')||m.includes('content: Brain');
     });
     var daysSince=brain[0]?Math.floor((Date.now()-new Date(brain[0].commit.author.date))/86400000):999;
     var newI=brain.filter(function(c){return isNew(c.commit.author.date);});
@@ -171,8 +171,8 @@ function loadLx(){
 
 function renderLx(c){
   var msg=c.commit.message.split('\n')[0];
-  var isArt=msg.includes('[ARTICLE]');
-  var isTool=msg.includes('[TOOL]');
+  var isArt=msg.includes('[ARTICLE]')||msg.includes('article');
+  var isTool=msg.includes('[TOOL]')||msg.includes('tool');
   var name=msg.replace('🤖','').replace('[ARTICLE]','').replace('[TOOL]','').replace(/\(score:[^)]+\)/g,'').trim();
   if(c._files&&c._files.length>0){
     var f=c._files[0];
