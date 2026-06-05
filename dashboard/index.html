@@ -124,7 +124,7 @@ function loadTe(){
     document.getElementById('te-n').textContent='—';
     document.getElementById('te-m').innerHTML='<span class="err">❌ خطأ اتصال</span>';
   }).then(function(){
-    return gh('/repos/nobill77/discovery-engine/actions/runs?per_page=5');
+    return gh('/repos/nobill77/trendlair/actions/runs?per_page=5');
   }).then(function(d){
     var rl=d.workflow_runs||[];
     if(rl[0])document.getElementById('te-rt').textContent='آخر run: منذ '+ago(rl[0].updated_at);
