@@ -1,10 +1,10 @@
 {
-  "checked_at": "2026-06-12T16:45:18.239479+00:00",
+  "checked_at": "2026-06-12T18:58:44.352350+00:00",
   "sites": [
     {
       "name": "Lexplair",
       "url": "https://lexplair.com",
-      "checked_at": "2026-06-12T16:45:18.239479+00:00",
+      "checked_at": "2026-06-12T18:58:44.352350+00:00",
       "pages": [
         {
           "path": "/",
@@ -38,7 +38,7 @@
     {
       "name": "Trendlair",
       "url": "https://trendlair.com",
-      "checked_at": "2026-06-12T16:45:18.239479+00:00",
+      "checked_at": "2026-06-12T18:58:44.352350+00:00",
       "pages": [
         {
           "path": "/",
@@ -47,7 +47,7 @@
           "error": null
         }
       ],
-      "ssl_days": 73,
+      "ssl_days": 72,
       "github_status": null,
       "overall": "ok"
     }
