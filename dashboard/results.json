@@ -1,44 +1,44 @@
 {
-  "checked_at": "2026-07-22T07:44:41.546645+00:00",
+  "checked_at": "2026-07-22T10:16:16.112722+00:00",
   "sites": [
     {
       "name": "Lexplair",
       "url": "https://lexplair.com",
-      "checked_at": "2026-07-22T07:44:41.546645+00:00",
+      "checked_at": "2026-07-22T10:16:16.112722+00:00",
       "pages": [
         {
           "path": "/",
-          "status": 200,
-          "ok": true,
-          "error": null
+          "status": null,
+          "ok": false,
+          "error": "Connection error: HTTPSConnectionPool(host='www.lexplair.com', port=443): Max retries exceeded wit"
         },
         {
           "path": "/articles",
-          "status": 200,
-          "ok": true,
-          "error": null
+          "status": null,
+          "ok": false,
+          "error": "Connection error: HTTPSConnectionPool(host='www.lexplair.com', port=443): Max retries exceeded wit"
         },
         {
           "path": "/tools",
-          "status": 200,
-          "ok": true,
-          "error": null
+          "status": null,
+          "ok": false,
+          "error": "Connection error: HTTPSConnectionPool(host='www.lexplair.com', port=443): Max retries exceeded wit"
         },
         {
           "path": "/store",
-          "status": 200,
-          "ok": true,
-          "error": null
+          "status": null,
+          "ok": false,
+          "error": "Connection error: HTTPSConnectionPool(host='www.lexplair.com', port=443): Max retries exceeded wit"
         }
       ],
-      "ssl_days": 85,
+      "ssl_days": 77,
       "github_status": null,
-      "overall": "ok"
+      "overall": "down"
     },
     {
       "name": "Trendlair",
       "url": "https://trendlair.com",
-      "checked_at": "2026-07-22T07:44:41.546645+00:00",
+      "checked_at": "2026-07-22T10:16:16.112722+00:00",
       "pages": [
         {
           "path": "/",
