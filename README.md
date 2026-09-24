@@ -1,41 +1,17 @@
-# 🛡️ Master Monitor
+# 🛡️ Master Monitor — the outside watcher
 
-نظام مراقبة تلقائي لكل مواقعك.
+Watches the Lair server **from outside** (GitHub Actions), so a dead or suspended server, or a stopped monitor, is
+noticed even when nothing on the server can report it. Rebuilt 24 Sep 2026.
 
-## الملفات
-
-| الملف | الوظيفة |
+| What | How |
 |---|---|
-| `config.yaml` | إعدادات المواقع |
-| `monitor.py` | script الفحص |
-| `.github/workflows/monitor.yml` | يشتغل كل 30 دقيقة |
-| `dashboard/index.html` | Dashboard |
+| Server down / suspended / unreachable | the heartbeat `https://www.lexplair.com/__lair/heartbeat.json` (and trendlair's) does not answer |
+| Server's monitor stopped | the heartbeat is older than 20 minutes |
+| Server can no longer e-mail | the heartbeat says `mail_ok: false` |
+| Daily record missing | `digest_last` older than 27 hours |
+| Pages and edge TLS | as before (Cloudflare may serve cached pages while the server is down — hence the heartbeat) |
 
-## إعداد Secrets في GitHub
+**Alerts:** an issue in this repository per problem, @mentioning the owner (GitHub e-mails it from its own servers and
+shows it in the GitHub app); it closes itself on recovery. Optional push: repository secret `NTFY_TOPIC`.
 
-روحي: repo → Settings → Secrets → Actions → New secret
-
-| Secret | القيمة |
-|---|---|
-| `TELEGRAM_TOKEN` | token بوت التليجرام |
-| `TELEGRAM_CHAT_ID` | الـ chat ID بتاعك |
-| `MONITOR_GITHUB_TOKEN` | GitHub token بصلاحيات repo |
-
-## إضافة موقع جديد
-
-في `config.yaml` أضيفي:
-
-```yaml
-  - name: NewSite
-    url: https://newsite.com
-    github_repo: username/repo
-    pages:
-      - /
-```
-
-## تشغيل محلي
-
-```bash
-pip install requests pyyaml
-python monitor.py
-```
+**Staged test:** Actions → Master Monitor → Run workflow → simulate = `down` or `stale`.

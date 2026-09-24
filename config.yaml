@@ -1,20 +1,18 @@
+heartbeat:
+  # written by the server's monitor every 5 minutes, never cached by Cloudflare
+  urls:
+    - https://www.lexplair.com/__lair/heartbeat.json
+    - https://www.trendlair.com/__lair/heartbeat.json
+  stale_min: 20
+
 sites:
   - name: Lexplair
-    url: https://lexplair.com
-    github_repo: nobill77/Lexplair
-    pages:
-      - /
-      - /articles
-      - /tools
-      - /store
-
+    url: https://www.lexplair.com
+    pages: [/, /articles, /tools, /store]
   - name: Trendlair
-    url: https://trendlair.com
-    github_repo: nobill77/discovery-engine
-    pages:
-      - /
+    url: https://www.trendlair.com
+    pages: [/]
 
 settings:
-  check_interval_minutes: 30
-  timeout_seconds: 10
-  alert_on_failure: true
+  timeout_seconds: 15
+  ssl_warn_days: 14

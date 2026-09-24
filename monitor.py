@@ -1,129 +1,177 @@
-import os
+"""Master Monitor — the OUTSIDE watcher of the Lair server (rebuilt 2026-09-24).
+
+Runs on GitHub Actions, i.e. somewhere that shares nothing with the server: not its network, not its e-mail (Resend),
+not its power. It answers one question the server cannot answer about itself: is the server, and its own monitor,
+alive?
+
+  * Heartbeat: https://www.lexplair.com/__lair/heartbeat.json (and the same on trendlair) is written by the server's
+    monitor on every 5-minute run and is never cached by Cloudflare. Unreachable on both hosts -> SERVER DOWN (or
+    suspended, or its DNS/Cloudflare path broken). Reachable but older than STALE_MIN -> the MONITOR stopped.
+  * The heartbeat also says whether the server can still send e-mail and when its daily record last went out; if the
+    server's own alerting is broken, this watcher raises the alarm instead.
+  * Public pages and edge TLS are still checked (note: Cloudflare may serve cached pages while the origin is down —
+    that is exactly why the heartbeat exists).
+
+Alerts: a GitHub issue per problem in this repository, @mentioning the owner (GitHub notifies by e-mail from its own
+servers and in the GitHub app), kept open while the problem lasts and closed with a comment when it recovers.
+Optional push: if the repository secret NTFY_TOPIC is set, the same line is pushed to the owner's phone (ntfy).
+"""
 import json
-import yaml
-import requests
-import ssl
+import os
 import socket
+import ssl
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
-RESULTS_FILE = Path("dashboard/results.json")
+import requests
+import yaml
+
+REPO = os.environ.get('GITHUB_REPOSITORY', 'nobill77/master-monitor')
+TOKEN = os.environ.get('GITHUB_TOKEN', '')
+NTFY_TOPIC = os.environ.get('NTFY_TOPIC', '')
+OWNER = os.environ.get('OWNER_HANDLE', 'nobill77')
+RESULTS = Path('dashboard/results.json')
+LABEL = 'lair-alert'
 
 
 def load_config():
-    with open("config.yaml") as f:
-        return yaml.safe_load(f)
+    return yaml.safe_load(open('config.yaml', encoding='utf-8'))
 
 
-def check_url(url, timeout=10):
+def get(url, timeout=15):
     try:
-        r = requests.get(url, timeout=timeout, allow_redirects=True)
-        return r.status_code, None
-    except requests.exceptions.ConnectionError as e:
-        return None, f"Connection error: {str(e)[:80]}"
-    except requests.exceptions.Timeout:
-        return None, "Timeout"
-    except Exception as e:
-        return None, str(e)[:80]
+        r = requests.get(url, timeout=timeout, headers={'User-Agent': 'lair-master-monitor/2', 'Cache-Control': 'no-cache'})
+        return r.status_code, r
+    except requests.RequestException as e:
+        return None, f'{type(e).__name__}: {str(e)[:120]}'
 
 
-def check_ssl(url):
+def ssl_days(host):
     try:
-        hostname = url.replace("https://", "").replace("http://", "").split("/")[0]
         ctx = ssl.create_default_context()
-        with ctx.wrap_socket(socket.socket(), server_hostname=hostname) as s:
-            s.settimeout(10)
-            s.connect((hostname, 443))
-            cert = s.getpeercert()
-            expire_str = cert["notAfter"]
-            expire_dt = datetime.strptime(expire_str, "%b %d %H:%M:%S %Y %Z").replace(tzinfo=timezone.utc)
-            days_left = (expire_dt - datetime.now(timezone.utc)).days
-            return days_left, None
-    except Exception as e:
-        return None, str(e)[:80]
+        with socket.create_connection((host, 443), timeout=10) as s, ctx.wrap_socket(s, server_hostname=host) as t:
+            na = t.getpeercert()['notAfter']
+        return (datetime.strptime(na, '%b %d %H:%M:%S %Y %Z').replace(tzinfo=timezone.utc) - datetime.now(timezone.utc)).days
+    except Exception:
+        return None
 
 
-def check_github_actions(repo, token):
-    if not token:
-        return None, "No GitHub token"
-    headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github+json"}
-    url = f"https://api.github.com/repos/{repo}/actions/runs?per_page=1"
-    try:
-        r = requests.get(url, headers=headers, timeout=10)
-        if r.status_code != 200:
-            return None, f"GitHub API error: {r.status_code}"
-        runs = r.json().get("workflow_runs", [])
-        if not runs:
-            return "no_runs", None
-        last = runs[0]
-        return last["conclusion"], None
-    except Exception as e:
-        return None, str(e)[:80]
+def check_heartbeat(cfg, sim=None):
+    """-> list of (key, message) problems, and the heartbeat seen."""
+    hb, errors = None, []
+    for url in cfg['heartbeat']['urls']:
+        st, r = get(url + f'?t={int(time.time())}')
+        if st == 200:
+            try:
+                hb = r.json(); break
+            except ValueError:
+                errors.append(f'{url}: not JSON')
+        else:
+            errors.append(f'{url}: {st if st else r}')
+    if sim == 'down':
+        hb, errors = None, ['simulated: both heartbeat URLs unreachable']
+    if sim == 'stale' and hb:
+        hb['epoch'] -= 3600
+    problems = []
+    if hb is None:
+        problems.append(('server-down', 'SERVER DOWN or unreachable: the heartbeat does not answer on either site — '
+                         + '; '.join(errors) + '. Possible causes: server stopped or suspended (billing), network, '
+                         'Cloudflare/DNS path. Check the Hetzner console first.'))
+        return problems, None
+    age_min = (time.time() - hb['epoch']) / 60
+    if age_min > cfg['heartbeat']['stale_min']:
+        problems.append(('monitor-stopped', f"MONITOR STOPPED: the server answers but its monitor last ran {age_min:.0f} minutes "
+                         f"ago ({hb.get('ts')}). The sites may be fine, but nothing is being checked or repaired. "
+                         "On the server: systemctl status lair-monitor.timer lair-monitor.service"))
+    if hb.get('mail_ok') is False:
+        problems.append(('server-mail', f"The server can no longer send e-mail (last attempt {hb.get('mail_last')}): its own alerts "
+                         "and daily record are not reaching you. Check the Resend key/account."))
+    dl = hb.get('digest_last')
+    if dl:
+        age_h = (datetime.now(timezone.utc) - datetime.strptime(dl, '%Y-%m-%d %H:%M UTC').replace(tzinfo=timezone.utc)).total_seconds() / 3600
+        if age_h > 27:
+            problems.append(('no-digest', f"The server's daily record has not been produced for {age_h:.0f} hours."))
+    if hb.get('failing_critical') and hb.get('mail_ok') is False:
+        problems.append(('critical-unreported', 'Critical checks failing on the server while it cannot e-mail: '
+                         + ', '.join(hb['failing_critical'])))
+    return problems, hb
 
 
-def run_checks():
-    config = load_config()
-    now = datetime.now(timezone.utc).isoformat()
-    results = {"checked_at": now, "sites": []}
-
-    for site in config["sites"]:
-        name = site["name"]
-        base_url = site["url"].rstrip("/")
-        repo = site.get("github_repo", "")
-        pages = site.get("pages", ["/"])
-
-        print(f"\n🔍 Checking {name} ({base_url})")
-        site_result = {
-            "name": name,
-            "url": base_url,
-            "checked_at": now,
-            "pages": [],
-            "ssl_days": None,
-            "github_status": None,
-            "overall": "ok"
-        }
-
-        site_issues = []
-
-        for page in pages:
-            url = base_url + page
-            status, error = check_url(url, config["settings"].get("timeout_seconds", 10))
-            ok = status == 200
-            site_result["pages"].append({"path": page, "status": status, "ok": ok, "error": error})
-            print(f"  {'✅' if ok else '❌'} {page} → {status or error}")
-            if not ok:
-                site_issues.append(f"❌ {page} → {status or error}")
-
-        if base_url.startswith("https"):
-            days, err = check_ssl(base_url)
-            site_result["ssl_days"] = days
-            print(f"  {'✅' if days and days > 14 else '⚠️'} SSL: {days} days left" if days else f"  ⚠️ SSL check failed: {err}")
-            if days and days < 14:
-                site_issues.append(f"⚠️ SSL expires in {days} days")
-
-        if repo:
-            conclusion, err = check_github_actions(repo, GITHUB_TOKEN)
-            site_result["github_status"] = conclusion
-            ok_gh = conclusion in ("success", "no_runs", None)
-            print(f"  {'✅' if ok_gh else '❌'} GitHub Actions: {conclusion or err}")
-            if conclusion and conclusion not in ("success", "no_runs"):
-                site_issues.append(f"❌ GitHub Actions: {conclusion}")
-
-        if site_issues:
-            site_result["overall"] = "down"
-
-        results["sites"].append(site_result)
-
-    RESULTS_FILE.parent.mkdir(exist_ok=True)
-    with open(RESULTS_FILE, "w") as f:
-        json.dump(results, f, indent=2)
-    print(f"\n💾 Results saved to {RESULTS_FILE}")
-
-    all_ok = all(s["overall"] == "ok" for s in results["sites"])
-    print(f"\n{'✅ All sites OK!' if all_ok else '🚨 Issues found!'}")
-    return results
+def check_sites(cfg):
+    problems, out = [], []
+    for site in cfg['sites']:
+        base = site['url'].rstrip('/')
+        for page in site.get('pages', ['/']):
+            st, r = get(base + page, cfg['settings'].get('timeout_seconds', 15))
+            out.append({'site': site['name'], 'path': page, 'status': st if st else str(r)})
+            if st != 200:
+                problems.append((f"page-{site['name']}-{page}", f"{site['name']} {page} answered {st if st else r}"))
+        host = base.split('//', 1)[1].split('/')[0]
+        d = ssl_days(host)
+        out.append({'site': site['name'], 'ssl_days': d})
+        if d is not None and d < cfg['settings'].get('ssl_warn_days', 14):
+            problems.append((f"ssl-{site['name']}", f"{site['name']}: edge TLS certificate expires in {d} days"))
+    return problems, out
 
 
-if __name__ == "__main__":
-    run_checks()
+# ---- alerts: GitHub issues (+ optional ntfy) ----------------------------------------------------------------------
+def gh(method, path, **kw):
+    return requests.request(method, f'https://api.github.com/repos/{REPO}{path}', timeout=20,
+                            headers={'Authorization': f'Bearer {TOKEN}', 'Accept': 'application/vnd.github+json'}, **kw)
+
+
+def open_issues():
+    r = gh('GET', f'/issues?state=open&labels={LABEL}&per_page=100')
+    return {i['title'].split('] ', 1)[0].lstrip('['): i for i in r.json()} if r.ok else {}
+
+
+def push(msg, prio=5):
+    if NTFY_TOPIC:
+        try:
+            requests.post(f'https://ntfy.sh/{NTFY_TOPIC}', data=msg[:300].encode(), timeout=10,
+                          headers={'Title': 'Lair outside watcher', 'Priority': str(prio)})
+        except requests.RequestException:
+            pass
+
+
+def alert(problems):
+    if not TOKEN:
+        print('no token: alerts not sent'); return
+    existing = open_issues()
+    now = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
+    keys = {k for k, _ in problems}
+    for k, msg in problems:
+        if k in existing:
+            continue                                   # already open: GitHub already told the owner
+        body = f"@{OWNER} {msg}\n\nDetected by the outside watcher at {now}. This issue closes itself when it recovers."
+        r = gh('POST', '/issues', json={'title': f'[{k}] {msg[:90]}', 'body': body, 'labels': [LABEL]})
+        print('issue opened' if r.ok else f'issue failed {r.status_code} {r.text[:200]}', k)
+        push(f'{msg[:250]}')
+    for k, issue in existing.items():
+        if k not in keys:
+            gh('POST', f"/issues/{issue['number']}/comments", json={'body': f'Recovered at {now}.'})
+            gh('PATCH', f"/issues/{issue['number']}", json={'state': 'closed'})
+            print('issue closed', k)
+            push(f'RECOVERED: {k}', 3)
+
+
+def main():
+    cfg = load_config()
+    sim = os.environ.get('SIMULATE') or None
+    hb_problems, hb = check_heartbeat(cfg, sim)
+    site_problems, pages = check_sites(cfg)
+    problems = hb_problems + site_problems
+    for k, m in problems:
+        print('PROBLEM', k, m)
+    if sim:
+        problems = [(f'test-{k}', f'[staged test, SIMULATE={sim}] {m}') for k, m in problems]
+    alert(problems)
+    RESULTS.parent.mkdir(exist_ok=True)
+    json.dump({'checked_at': datetime.now(timezone.utc).isoformat(), 'heartbeat': hb, 'pages': pages,
+               'problems': [{'key': k, 'message': m} for k, m in problems]}, open(RESULTS, 'w'), indent=2)
+    print('OK' if not problems else f'{len(problems)} problem(s)')
+
+
+if __name__ == '__main__':
+    main()
