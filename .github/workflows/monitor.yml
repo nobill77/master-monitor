@@ -1,11 +1,26 @@
 name: Master Monitor
+
+# The outside watcher of the Lair server (see monitor.py). GitHub runs scheduled jobs late and sometimes skips them;
+# the server's own monitor checks that this workflow ran within 12 h (check outside-watcher), and the owner's PC runs a
+# second outside watcher every 5 minutes. The results commit keeps the repository active, so GitHub never disables
+# the schedule for inactivity.
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '*/10 * * * *'
   workflow_dispatch:
+    inputs:
+      simulate:
+        description: 'Staged test: "down" or "stale" (opens and later closes a test issue); empty for a normal run'
+        required: false
+        default: ''
 
 permissions:
   contents: write
+  issues: write
+
+concurrency:
+  group: master-monitor
+  cancel-in-progress: false
 
 jobs:
   monitor:
@@ -18,21 +33,23 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: pip install requests pyyaml
 
       - name: Run monitor
         env:
-          GITHUB_TOKEN: ${{ secrets.MONITOR_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          SIMULATE: ${{ github.event.inputs.simulate }}
         run: python monitor.py
 
       - name: Commit dashboard results
         run: |
           git config user.name  "Master Monitor"
           git config user.email "monitor@lexplair.com"
-          git remote set-url origin https://x-access-token:${{ secrets.MONITOR_GITHUB_TOKEN }}@github.com/nobill77/master-monitor.git
           git add dashboard/results.json
           git diff --staged --quiet || git commit -m "📊 Monitor: update results $(date -u '+%H:%M UTC')"
+          git pull --rebase --quiet origin main || true
           git push origin HEAD:main
